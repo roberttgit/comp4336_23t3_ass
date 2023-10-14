@@ -33,10 +33,10 @@ $wlanInterface  = "Intel Wi-Fi 6 AX200"
 $script_location = "C:\Users\Robert\Documents\comp4336\ass\scripts\asswifi.py"
 
 
-NOTES / REMARKS
-This script can take a while to run!! It can take 20-30 minutes to process the data from ~180 captures on the UNSW campus.
-(on Intel i7-10700K, using one core.)
-Go and drink coffee after you begin the execution.
+# NOTES / REMARKS
+# This script can take a while to run!! It can take 20-30 minutes to process the data from ~180 captures on the UNSW campus.
+# (on Intel i7-10700K, using one core.)
+# Go and drink coffee after you begin the execution.
 
 ###########################################################################################################
 #generate csv for each txt
