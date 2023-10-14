@@ -1,11 +1,12 @@
 # INPUT FILES 
 #Text files from capture script.
-$inputdirectory  = "C:\Users\Robert\Documents\comp4336\ass\extracteddata\cliout"
+$inputdirectory = "C:\Users\Robert\Documents\comp4336\ass\extracteddata\cliout"
 #BSSID - SSID - Width lookup table from Netspot export
 $netspotfilepath = "C:\Users\Robert\Documents\comp4336\ass\extracteddata\netspot\netspot_unique.csv"
 
 
 # WORK FILES & OUTPUT FILES
+# !! Note: In the below paths, outfilepath1, outpathfile2, outfilepath3, outfilepath4 must NOT be inside outputDirectory !!
 #Output of conversion from (Text files from capture program) -> (CSV)
 #Please clear this directory's contents before running the script.
 $outputdirectory = "C:\Users\Robert\Documents\comp4336\ass\extracteddata\csvout1"
@@ -18,6 +19,10 @@ $outfilepath2    = "C:\Users\Robert\Documents\comp4336\ass\extracteddata\csvout2
 #Unique concatenated CSV data, with Channel Width added (reference on BSSID and SSID), with OS and wlanInterface added
 $outfilepath3    = "C:\Users\Robert\Documents\comp4336\ass\extracteddata\csvout2\concatenated_data3.csv"
 
+# FINAL OUTPUT FILE
+#Data arranged with columns in correct order and correct headings as per template.
+$outfilepath4    = "C:\Users\Robert\Documents\comp4336\ass\extracteddata\csvout2\concatenated_data4.csv"
+
 # MANUALLY ENTERED DETAILS - to go into the CSV
 $operatingSystem= "Windows 11"
 $wlanInterface  = "Intel Wi-Fi 6 AX200"
@@ -28,12 +33,12 @@ $wlanInterface  = "Intel Wi-Fi 6 AX200"
 $script_location = "C:\Users\Robert\Documents\comp4336\ass\scripts\asswifi.py"
 
 
-# NOTES / REMARKS
-#This script can take a while to run!! It can take 20-30 minutes to process the data from ~180 captures on the UNSW campus.
-#(on Intel i7-10700K, using one core.)
-#Go and drink coffee after you begin the execution.
+NOTES / REMARKS
+This script can take a while to run!! It can take 20-30 minutes to process the data from ~180 captures on the UNSW campus.
+(on Intel i7-10700K, using one core.)
+Go and drink coffee after you begin the execution.
 
-############################################################################################################
+###########################################################################################################
 #generate csv for each txt
 if (-not (Test-Path -Path $outputdirectory)) {
     New-Item -Path $outputdirectory -ItemType Directory -Force
@@ -99,10 +104,31 @@ foreach ($catRow in $catCsv) {
 
 $catCsv2 = ($catCsv | Where-Object { $_.Width -ne '' })
 
-#Add the OS and WLAN Interface info
+#Add the OS and WLAN Interface info and blank noise info
 foreach ($catRow in $catCsv2) {
     $catRow | Add-Member -MemberType NoteProperty -Name "OS" -Value $operatingSystem
     $catRow | Add-Member -MemberType NoteProperty -Name "Interface" -Value $wlanInterface
+    $catRow | Add-Member -MemberType NoteProperty -Name "noise level" -Value ""
 }
 $catCsv2 | Export-Csv -Path $outfilepath3 -NoTypeInformation
+
+#arrange the columns correctly
+# Correct
+#   time,os,network interface,gps latitude,gps longitude,gps accuracy (meters),ssid,bssid,wi-fi standard,
+#   frequency,network channel,channel width (in mhz),rssi (in dbm),noise level (in dbm),public ip address,
+#   network delay (in ms)
+# Source 
+#   "Timestamp","GPSLat","GPSLong","GPSAcc","SSID","BSSID","Standard","Frequency","Channel","RSSI (dBm)","Public IP Address","Network Delay","Width","OS","Interface"
+$CSVData = Import-Csv -Path $outfilepath3
+$rearrangedData = ($CSVData | Where-Object { ($_.Width).Length -le 4 }) | Select-Object "Timestamp", "OS", "Interface", "GPSLat", "GPSLong", "GPSAcc", "SSID", "BSSID", "Standard", "Frequency", "Channel", "Width", "RSSI (dBm)", "noise level", "Public IP Address", "Network Delay"
+
+$rearrangedData | Export-Csv -Path $outfilepath4 -NoTypeInformation
+
+#Replace the header with the one from the example
+$lines = Get-Content -Path $outfilepath4
+$lines[0] = "time,os,network interface,gps latitude,gps longitude,gps accuracy (meters),ssid,bssid,wi-fi standard,frequency,network channel,channel width (in mhz),rssi (in dbm),noise level (in dbm),public ip address,network delay (in ms)" 
+$lines | Set-Content -Path $outfilepath4
+
+
+
 
