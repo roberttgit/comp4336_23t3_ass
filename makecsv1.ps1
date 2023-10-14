@@ -34,54 +34,54 @@ $script_location = "C:\Users\Robert\Documents\comp4336\ass\scripts\asswifi.py"
 #Go and drink coffee after you begin the execution.
 
 ############################################################################################################
-# #generate csv for each txt
-# if (-not (Test-Path -Path $outputdirectory)) {
-#     New-Item -Path $outputdirectory -ItemType Directory -Force
-# }
+#generate csv for each txt
+if (-not (Test-Path -Path $outputdirectory)) {
+    New-Item -Path $outputdirectory -ItemType Directory -Force
+}
 
-# Get-ChildItem -File -Path $inputdirectory | Foreach {$fn = $_.fullname; $n = $_.name; py `"$script_location`" `"$fn`" `"$outputdirectory`\$n`"}
+Get-ChildItem -File -Path $inputdirectory | Foreach {$fn = $_.fullname; $n = $_.name; py `"$script_location`" `"$fn`" `"$outputdirectory`\$n`"}
 
-# #concatenate all of the csv and remove duplicates
-# $contentList = @()
+#concatenate all of the csv and remove duplicates
+$contentList = @()
 
-# $allInputCSVFiles = Get-ChildItem -Path $outputdirectory -Recurse -Filter *.csv
-# foreach ($file in $allInputCSVFiles) {
-#     $content = Import-Csv -Path $file.FullName
-#     $contentList += $content
-# }
+$allInputCSVFiles = Get-ChildItem -Path $outputdirectory -Recurse -Filter *.csv
+foreach ($file in $allInputCSVFiles) {
+    $content = Import-Csv -Path $file.FullName
+    $contentList += $content
+}
 
-# if (Test-Path -Path $workFilePath) {
-#     rm $workFilePath -Force
-# }
-# if (Test-Path -Path $outfilepath1) {
-#     rm $outfilepath1 -Force
-# }
-# New-Item -ItemType File -Path $workFilePath -Force
-# New-Item -ItemType File -Path $outfilepath1 -Force
+if (Test-Path -Path $workFilePath) {
+    rm $workFilePath -Force
+}
+if (Test-Path -Path $outfilepath1) {
+    rm $outfilepath1 -Force
+}
+New-Item -ItemType File -Path $workFilePath -Force
+New-Item -ItemType File -Path $outfilepath1 -Force
 
-# foreach ($csvFile in $allInputCSVFiles) {
-#     $csvContent = Import-Csv -Path $csvFile.FullName
-#     $contentList += $csvContent
-# }
+foreach ($csvFile in $allInputCSVFiles) {
+    $csvContent = Import-Csv -Path $csvFile.FullName
+    $contentList += $csvContent
+}
 
-# $mergedCsvContent = $contentList | ConvertTo-Csv -NoTypeInformation
-# $mergedCsvContent | Out-File -FilePath $workfilepath -Encoding UTF8
+$mergedCsvContent = $contentList | ConvertTo-Csv -NoTypeInformation
+$mergedCsvContent | Out-File -FilePath $workfilepath -Encoding UTF8
 
-# $uniqueLines = Get-Content $workfilepath | Select-Object -Unique
-# $uniqueLines | Set-Content $outfilepath1
+$uniqueLines = Get-Content $workfilepath | Select-Object -Unique
+$uniqueLines | Set-Content $outfilepath1
 
-# #add the Channel Width info
-# $catCsv = Import-Csv -Path $outfilepath1
-# $netspotCsv = Import-Csv -Path $netspotfilepath
+#add the Channel Width info
+$catCsv = Import-Csv -Path $outfilepath1
+$netspotCsv = Import-Csv -Path $netspotfilepath
 
-# foreach ($catRow in $catCsv) {
-#     $bssid = $catRow.BSSID
-#     $ssid = $catRow.SSID
+foreach ($catRow in $catCsv) {
+    $bssid = $catRow.BSSID
+    $ssid = $catRow.SSID
 
-#     $bssidWidth = ($netspotCsv | Where-Object { $_.BSSID -eq $bssid }).Width
-#     $catRow | Add-Member -MemberType NoteProperty -Name "Width" -Value $bssidWidth
-# }
-# $catCsv | Export-Csv -Path $outfilepath2 -NoTypeInformation
+    $bssidWidth = ($netspotCsv | Where-Object { $_.BSSID -eq $bssid }).Width
+    $catRow | Add-Member -MemberType NoteProperty -Name "Width" -Value $bssidWidth
+}
+$catCsv | Export-Csv -Path $outfilepath2 -NoTypeInformation
 
 # Where there is a BSSID corresponding to two SSID, choose the width of the BSSID for the correct SSID (Match on BSSID, SSID)
 $catCsv = Import-Csv -Path $outfilepath2
